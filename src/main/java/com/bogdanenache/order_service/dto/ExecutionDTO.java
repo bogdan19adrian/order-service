@@ -8,4 +8,8 @@ public record ExecutionDTO(
     Long orderId,
     BigDecimal price,
     Instant created
-)  {}
+)  {
+
+    public ExecutionDTO {
+    }
+}

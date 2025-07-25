@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @ToString
 @AttributeOverride(name = "version", column = @Column(name = "exc_version"))
+@Table(name = "EXECUTIONS")
 public class Execution {
 
     @Id
@@ -37,9 +39,6 @@ public class Execution {
     @Column(name = "exc_internal_id", length = 36, nullable = false)
     private String internalId;
 
-    @Column(name = "ord_order_id", length = 10, nullable = false)
-    private Long orderId;
-
     @Column(name = "exc_price", length = 20, nullable = false)
     private BigDecimal price;
 
@@ -51,9 +50,9 @@ public class Execution {
     @Column(name = "exc_version", length = 6)
     private int version;
 
-    @Column(name = "ord_created", insertable = false, updatable = false)
+    @Column(name = "exc_created", insertable = false, updatable = false)
     private LocalDateTime created;
 
-    @Column(name = "ord_last_updated", insertable = false, updatable = false)
+    @Column(name = "exc_last_updated", insertable = false, updatable = false)
     private LocalDateTime lastUpdated;
 }

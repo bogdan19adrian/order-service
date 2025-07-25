@@ -24,4 +24,9 @@ public record OrderDTO(
     String status,
 
     ExecutionDTO execution
-) {}
+) {
+
+    public OrderDTO {
+    }
+
+}
