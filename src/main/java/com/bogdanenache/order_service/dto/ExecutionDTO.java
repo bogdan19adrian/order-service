@@ -4,12 +4,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 public record ExecutionDTO(
-    String internalId,
-    Long orderId,
+    String id,
+    String orderId,
     BigDecimal price,
-    Instant created
+    Instant createdAt
 )  {
 
     public ExecutionDTO {
     }
+
 }

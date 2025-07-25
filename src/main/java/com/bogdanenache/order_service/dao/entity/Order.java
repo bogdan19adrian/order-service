@@ -12,6 +12,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -64,11 +65,9 @@ public class Order {
     @Column(name = "ord_version", length = 6)
     private int version;
 
-    @Column(name = "ord_created", insertable = false, updatable = false)
-    private LocalDateTime created;
+    @Column(name = "ord_created")
+    private Instant createdAt;
 
-    @Column(name = "ord_last_updated", insertable = false, updatable = false)
-    private LocalDateTime lastUpdated;
 
     public enum OrderStatus {
         PROCESSED,

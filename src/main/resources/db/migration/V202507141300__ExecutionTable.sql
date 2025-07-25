@@ -5,7 +5,6 @@ CREATE TABLE ORDER_SERVICE.EXECUTIONS
     ORD_ORDER_ID     NUMERIC(10, 0)                 NOT NULL,
     EXC_PRICE        CHARACTER VARYING(20)          NOT NULL,
     EXC_CREATED      TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
-    EXC_LAST_UPDATED TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
     EXC_VERSION      NUMERIC(6, 0)                  NOT NULL
 ) WITH (
       OIDS = FALSE
@@ -30,32 +29,3 @@ CREATE SEQUENCE IF NOT EXISTS ORDER_SERVICE.SEQ_EXC_ID
     NO CYCLE
     CACHE 20;
 
-CREATE
-    OR REPLACE FUNCTION ORDER_SERVICE.exc_pre_ins_upd_trig$execution()
-    RETURNS trigger
-AS
-$BODY$
-BEGIN
-    IF
-        TG_OP = 'INSERT' THEN
-        new.exc_created := CURRENT_TIMESTAMP;
-    END IF;
-    new.exc_last_updated
-        := CURRENT_TIMESTAMP;
-    IF
-        TG_OP = 'INSERT' THEN
-        RETURN NEW;
-    ELSIF
-        TG_OP = 'UPDATE' THEN
-        RETURN NEW;
-    END IF;
-END;
-$BODY$
-    LANGUAGE plpgsql;
-
-CREATE TRIGGER exc_pre_ins_upd_trig
-    BEFORE INSERT OR
-        UPDATE
-    ON ORDER_SERVICE.EXECUTIONS
-    FOR EACH ROW
-EXECUTE PROCEDURE ORDER_SERVICE.exc_pre_ins_upd_trig$execution();

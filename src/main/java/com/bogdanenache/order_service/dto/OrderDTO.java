@@ -3,9 +3,10 @@ package com.bogdanenache.order_service.dto;
 import com.bogdanenache.order_service.dto.validation.OneOf;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 
 public record OrderDTO(
-    String internalId,
+    String id,
 
     @NotNull
     String accountId,
@@ -22,6 +23,8 @@ public record OrderDTO(
     Integer quantity,
 
     String status,
+
+    Instant createdAt,
 
     ExecutionDTO execution
 ) {

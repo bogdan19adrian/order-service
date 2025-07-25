@@ -7,8 +7,10 @@ import com.bogdanenache.order_service.dao.entity.Order.OrderStatus;
 import com.bogdanenache.order_service.dao.repository.ExecutionRepository;
 import com.bogdanenache.order_service.dao.repository.OrderRepository;
 import com.bogdanenache.order_service.dto.OrderDTO;
+import com.bogdanenache.order_service.mapper.ExecutionMapper;
 import com.bogdanenache.order_service.mapper.OrderMapper;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,36 +27,49 @@ public class OrderService {
     private final ExecutionRepository executionRepo;
 
     public OrderDTO placeOrder(OrderDTO orderDTO) {
-        
+
         final BigDecimal price = priceFeed.getPrice(orderDTO.symbol());
-
-        final Order order = OrderMapper.INSTANCE.orderDtoToOrder(orderDTO);
-        order.setOrderInternalId(UUID.randomUUID().toString());
-        order.setStatus(OrderStatus.PROCESSED);
-
-        final Execution execution = Execution.builder()
-                .order(order)
-                .price(price)
-                .internalId(UUID.randomUUID().toString())
-                .build();
+        final Order order = populateOrder(orderDTO);
+        final Execution execution = populateExecution(order, price);
 
         order.setExecution(execution); // link both ways
-        return OrderMapper.INSTANCE.orderToOrderDto(orderRepo.save(order), execution);
+        var executionDto = ExecutionMapper.INSTANCE.mapExecutionToExecutionDto(execution, order.getOrderInternalId());
+        return OrderMapper.INSTANCE.orderToOrderDto(orderRepo.save(order), executionDto);
 
     }
+
+
 
     public Optional<OrderDTO> getOrderByInternalId(String internalId) {
         var order = orderRepo.getOrderByOrderInternalId(internalId);
         if (order == null) {
             return Optional.empty();
         }
-        return Optional.of(OrderMapper.INSTANCE.orderToOrderDto(order, order.getExecution()));
+        var executionDto = ExecutionMapper.INSTANCE.mapExecutionToExecutionDto(order.getExecution(), order.getOrderInternalId());
+        return Optional.of(OrderMapper.INSTANCE.orderToOrderDto(order, executionDto));
     }
 
     public List<OrderDTO> getOrderByAccountId(String accountId) {
         return orderRepo.getOrderByAccountId(accountId)
                 .stream()
-                .map(x -> OrderMapper.INSTANCE.orderToOrderDto(x, x.getExecution()))
+                .map(x -> OrderMapper.INSTANCE.orderToOrderDto(x,
+                        ExecutionMapper.INSTANCE.mapExecutionToExecutionDto(x.getExecution(),
+                                x.getExecution().getInternalId())))
                 .toList();
+    }
+
+    private static Execution populateExecution(Order order, BigDecimal price) {
+        return Execution.builder()
+                .order(order)
+                .price(price)
+                .internalId(UUID.randomUUID().toString())
+                .createdAt(Instant.now())
+                .build();
+    }
+
+    private Order populateOrder(OrderDTO orderDTO) {
+        final Order order = OrderMapper.INSTANCE.orderDtoToOrder(orderDTO);
+        order.setStatus(OrderStatus.PROCESSED);
+        return order;
     }
 }

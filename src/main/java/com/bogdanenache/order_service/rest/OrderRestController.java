@@ -26,15 +26,15 @@ public class OrderRestController {
     }
 
     @GetMapping("/orders/{id}")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String internalId) {
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable(value = "id") String id) {
 
-      var orderDTO =  orderService.getOrderByInternalId(internalId);
+      var orderDTO =  orderService.getOrderByInternalId(id);
         return orderDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 
     }
 
-    @GetMapping("/orders?accountId={accountId}")
-    public ResponseEntity<List<OrderDTO>> getOrdersByAccountId(@RequestParam String accountId) {
+    @GetMapping("/orders")
+    public ResponseEntity<List<OrderDTO>> getOrdersByAccountId(@RequestParam("accountId") String accountId) {
         return ResponseEntity.ok(orderService.getOrderByAccountId(accountId));
 
     }

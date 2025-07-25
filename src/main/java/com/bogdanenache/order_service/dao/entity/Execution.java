@@ -11,6 +11,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -50,9 +51,7 @@ public class Execution {
     @Column(name = "exc_version", length = 6)
     private int version;
 
-    @Column(name = "exc_created", insertable = false, updatable = false)
-    private LocalDateTime created;
+    @Column(name = "exc_created")
+    private Instant createdAt;
 
-    @Column(name = "exc_last_updated", insertable = false, updatable = false)
-    private LocalDateTime lastUpdated;
 }
