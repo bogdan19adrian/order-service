@@ -1,0 +1,77 @@
+package com.bogdanenache.order_service.dao.entity;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Version;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+
+@Entity
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@ToString
+@AttributeOverride(name = "version", column = @Column(name = "ord_version"))
+public class Order {
+
+    @Id
+    @GeneratedValue(generator = "ord_id_generator")
+    @SequenceGenerator(name = "ord_id_generator", sequenceName = "SEQ_ORD_ID", allocationSize = 1)
+    @Column(name = "ord_id", nullable = false, length = 10, insertable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
+    private Long id;
+
+    @Column(name = "ord_internal_id", length = 36, nullable = false)
+    private String orderInternalId;
+
+    @Column(name = "ord_account_id", length = 36, nullable = false)
+    private Long accontId;
+
+    @Column(name = "ord_symbol", length = 20, nullable = false)
+    private String symbol;
+
+    @Column(name = "ord_side", length = 20, nullable = false)
+    private OrderSide side;
+
+    @Column(name = "ord_quantity", length = 20, nullable = false)
+    private Integer quantity;
+
+    @Column(name = "ord_status", length = 20, nullable = false)
+    private OrderStatus status;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Execution execution;
+
+    @Version
+    @Column(name = "ord_version", length = 6)
+    private int version;
+
+    @Column(name = "ord_created", insertable = false, updatable = false)
+    private LocalDateTime created;
+
+    @Column(name = "ord_last_updated", insertable = false, updatable = false)
+    private LocalDateTime lastUpdated;
+
+    public enum OrderStatus {
+        PROCESSED,
+        FAILED
+    }
+
+    public enum OrderSide {
+        BUY,
+        SELL
+    }
+
+}
