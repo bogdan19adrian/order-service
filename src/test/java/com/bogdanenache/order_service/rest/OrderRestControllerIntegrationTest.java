@@ -38,7 +38,7 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     @Test
     @DisplayName("Calls API to create an order successfully")
     public void shouldCreateOrderSuccessfully() {
-        var orderDTO = createOrder(10);
+        var orderDTO = createOrder(10, "AAPL");
         var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, OrderDTO.class);
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(201, response.getStatusCode().value());
@@ -49,7 +49,7 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     @Test
     @DisplayName("Calls API  to create an order with -1 quantity and fails")
     public void shouldFailCreateOrderIfQuantityIsNegative() {
-        var orderDTO = createOrder(-1);
+        var orderDTO = createOrder(-1, "AAPL");
         var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, ErrorResponse.class);
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(400, response.getStatusCode().value());

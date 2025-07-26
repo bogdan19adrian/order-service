@@ -7,11 +7,11 @@ import java.util.UUID;
 public class BaseTest {
 
 
-    protected OrderDTO createOrder(Integer quantity) {
+    protected OrderDTO createOrder(Integer quantity, String symbol) {
         return new OrderDTO(
                 UUID.randomUUID().toString(),
                 UUID.randomUUID().toString(),
-                "AAPL",
+                symbol,
                 Side.SELL.name(),
                 quantity,
                 null,
