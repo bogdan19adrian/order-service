@@ -1,6 +1,7 @@
 package com.bogdanenache.order_service.rest;
 
 import com.bogdanenache.order_service.dto.OrderDTO;
+import com.bogdanenache.order_service.mapper.OrderMapper;
 import com.bogdanenache.order_service.service.OrderService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class OrderRestController {
+public class OrderRestController implements OrderAPI {
 
     private final OrderService orderService;
 

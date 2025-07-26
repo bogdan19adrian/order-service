@@ -1,0 +1,14 @@
+package com.bogdanenache.order_service.exception;
+
+public enum ErrorCode {
+    BAD_REQUEST,
+    INTERNAL_SERVER_ERROR,
+    TYPE_MISMATCH,
+    CONSTRAINT_VIOLATION,
+    NOT_FOUND,
+    CONFLICT,
+    INTERNAL_ERROR,
+    VALIDATION_ERROR,
+    MISSING_PARAMETER,
+    MALFORMED_JSON
+}
