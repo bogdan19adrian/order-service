@@ -4,6 +4,10 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.List;
 import java.util.stream.Stream;
+/**
+ * Implementation of the OneOf constraint validator that checks if a given string
+ * matches one of the enum constants defined in the specified enum class.
+ */
 
 public class OneOfValidator implements ConstraintValidator<OneOf, CharSequence> {
 

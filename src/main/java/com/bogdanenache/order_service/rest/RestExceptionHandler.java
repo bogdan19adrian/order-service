@@ -1,9 +1,11 @@
 package com.bogdanenache.order_service.rest;
 
 import com.bogdanenache.order_service.dto.ErrorResponse;
+import com.bogdanenache.order_service.exception.BadRequestException;
 import com.bogdanenache.order_service.exception.ConflictException;
 import com.bogdanenache.order_service.exception.ErrorCode;
 import com.bogdanenache.order_service.exception.ResourceNotFoundException;
+import com.bogdanenache.order_service.exception.UnexpectedException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -52,6 +54,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(ErrorCode.INTERNAL_ERROR.name(), "An unexpected error occurred"));
+    }
+
+    @ExceptionHandler(UnexpectedException.class)
+    public ResponseEntity<ErrorResponse> UnexpectedException(Exception ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse(ErrorCode.SERVICE_UNAVAILABLE.name(), "Service is currently unavailable"));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse(ErrorCode.UNPROCESSABLE_ENTITY.name(), "An unexpected error occurred while processing the request"));
     }
 
     @Override

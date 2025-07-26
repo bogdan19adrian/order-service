@@ -29,7 +29,8 @@ public class UnexpectedException extends RuntimeException {
 
     public enum Message {
         FAILED_TO_FETCH_SYMBOL("Failed to fetch price for symbol: %s."),
-        INVALID_RESPONSE("Invalid price feed response: missing data.");
+        INVALID_RESPONSE("Invalid price feed response: missing data."),
+        UNABLE_TO_CALL_PRICE_FEED("Service unavailable due to technical errors.");
 
         final String msg;
 

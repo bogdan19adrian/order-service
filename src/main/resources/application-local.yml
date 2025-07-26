@@ -5,6 +5,16 @@ spring:
     password: orderservice
   flyway:
     enabled: true
+  jpa:
+    properties:
+      hibernate:
+        default_schema: order_service
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 order-service:
   price-feed-url: http://localhost:8089/prices
+  retry:
+    maxAttempts: 5
+    backoff:
+      delay: 25
+      maxDelay: 250

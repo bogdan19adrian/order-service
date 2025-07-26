@@ -12,5 +12,4 @@ public record ExecutionDTO(
 
     public ExecutionDTO {
     }
-
 }
