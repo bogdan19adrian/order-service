@@ -1,0 +1,60 @@
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_USER: orderservice
+      POSTGRES_PASSWORD: orderservice
+      POSTGRES_DB: orderdb
+      PGDATA: /var/lib/postgresql/data/db_files
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "5422:5432"
+    networks:
+      - orderservice
+    restart: always
+    volumes:
+      - data_sql:/var/lib/postgresql/data
+
+  wiremock:
+    image: wiremock/wiremock:3.3.1
+    container_name: wiremock_prices
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./mockStubMapping:/home/wiremock/mappings
+    restart: unless-stopped
+    networks:
+      - orderservice
+  order-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${SERVER_PORT}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${SERVER_PORT}
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?currentSchema=${DATABASE_SCHEMA}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5422/orderdb?currentSchema=order_service
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: ${DATABASE_SCHEMA}
+      ORDER_SERVICE_PRICE_FEED_URL: ${PRICE_FEED_URL}
+      ORDER_SERVICE_RETRY_MAX_ATTEMPTS: ${ORDER_SERVICE_RETRY_MAX_ATTEMPTS}
+      ORDER_SERVICE_RETRY_DELAY: ${ORDER_SERVICE_RETRY_DELAY}
+      ORDER_SERVICE_RETRY_MAX_DELAY: ${ORDER_SERVICE_RETRY_MAX_DELAY}
+    depends_on:
+      - postgres
+      - wiremock
+    networks:
+      - orderservice
+
+networks:
+  orderservice:
+
+volumes:
+  data_sql:
