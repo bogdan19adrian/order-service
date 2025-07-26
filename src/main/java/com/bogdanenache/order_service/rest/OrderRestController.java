@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,13 +21,13 @@ public class OrderRestController implements OrderAPI {
 
     private final OrderService orderService;
 
-    @PostMapping("/orders")
+    @PostMapping(value = "/orders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid OrderDTO orderDTO) {
 
         return new ResponseEntity<>(orderService.placeOrder(orderDTO), HttpStatus.CREATED);
     }
 
-    @GetMapping("/orders/{id}")
+    @GetMapping(value = "/orders/{id}", produces =  MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable(value = "id") String id) {
 
         var orderDTO = orderService.getOrderByInternalId(id);
@@ -34,7 +35,7 @@ public class OrderRestController implements OrderAPI {
 
     }
 
-    @GetMapping("/orders")
+    @GetMapping(value = "/orders", produces =  MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<OrderDTO>> getOrdersByAccountId(@RequestParam("accountId") String accountId) {
         return ResponseEntity.ok(orderService.getOrderByAccountId(accountId));
 

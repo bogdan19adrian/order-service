@@ -20,7 +20,6 @@ public interface OrderAPI {
                     content = @Content(schema = @Schema(implementation = OrderDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
     })
-    @PostMapping("/orders")
     ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid OrderDTO orderDTO);
 
 
@@ -30,7 +29,6 @@ public interface OrderAPI {
                     content = @Content(schema = @Schema(implementation = OrderDTO.class))),
             @ApiResponse(responseCode = "404", description = "Order not found", content = @Content)
     })
-    @GetMapping("/orders/{id}")
     ResponseEntity<OrderDTO> getOrderById(
             @Parameter(description = "Internal order ID") @PathVariable("id") String id);
 
@@ -40,7 +38,6 @@ public interface OrderAPI {
             @ApiResponse(responseCode = "200", description = "Orders found",
                     content = @Content(schema = @Schema(implementation = OrderDTO.class)))
     })
-    @GetMapping("/orders")
     ResponseEntity<List<OrderDTO>> getOrdersByAccountId(
             @Parameter(description = "Account ID to fetch orders for") @RequestParam("accountId") String accountId);
 
