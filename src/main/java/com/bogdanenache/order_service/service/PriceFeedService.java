@@ -72,4 +72,5 @@ public class PriceFeedService {
         log.error(ex.getMessage(), ex);
         throw ex;
     }
+
 }
