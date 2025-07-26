@@ -1,7 +1,6 @@
 package com.bogdanenache.order_service.rest;
 
 import com.bogdanenache.order_service.dto.OrderDTO;
-import com.bogdanenache.order_service.mapper.OrderMapper;
 import com.bogdanenache.order_service.service.OrderService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -29,7 +28,7 @@ public class OrderRestController implements OrderAPI {
     @GetMapping("/orders/{id}")
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable(value = "id") String id) {
 
-      var orderDTO =  orderService.getOrderByInternalId(id);
+        var orderDTO = orderService.getOrderByInternalId(id);
         return orderDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 
     }
