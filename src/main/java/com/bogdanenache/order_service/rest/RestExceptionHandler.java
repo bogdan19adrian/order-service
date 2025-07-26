@@ -6,6 +6,7 @@ import com.bogdanenache.order_service.exception.ConflictException;
 import com.bogdanenache.order_service.exception.ErrorCode;
 import com.bogdanenache.order_service.exception.ResourceNotFoundException;
 import com.bogdanenache.order_service.exception.UnexpectedException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -68,6 +69,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new ErrorResponse(ErrorCode.UNPROCESSABLE_ENTITY.name(), "An unexpected error occurred while processing the request"));
+    }
+
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RequestNotPermitted ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ErrorResponse(ErrorCode.TOO_MANY_REQUESTS.name(), "An unexpected error occurred while processing the request"));
     }
 
     @Override

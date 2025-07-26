@@ -2,4 +2,13 @@ spring:
   application:
     name: order-service
 
-
+resilience4j.ratelimiter:
+  configs:
+    default:
+      registerHealthIndicator: true
+      limitForPeriod: 10
+      limitRefreshPeriod: 1s
+      timeoutDuration: 0
+  instances:
+    orderServiceRateLimiter:
+      baseConfig: default

@@ -15,6 +15,7 @@ A Spring Boot application for managing orders.
 - Maven
 - PostgreSQL
 - Docker
+- resilience4j for rate limiting
 
 ## Setup
 
