@@ -36,7 +36,7 @@ public class Order {
     @SequenceGenerator(name = "ord_id_generator", sequenceName = "SEQ_ORD_ID", allocationSize = 1)
     @Column(name = "ord_id", nullable = false, length = 10, insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
-    private Long id;
+    private Long ordId;
 
     @Column(name = "ord_internal_id", length = 36, nullable = false)
     private String orderInternalId;

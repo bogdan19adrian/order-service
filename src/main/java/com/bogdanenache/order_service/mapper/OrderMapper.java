@@ -28,6 +28,7 @@ public interface OrderMapper {
     static String mapToOrderInternalId(OrderDTO orderDTO) {
         return UUID.randomUUID().toString();
     }
+
     @Named("createdAt")
     static Instant createdAt(OrderDTO orderDTO) {
         return Instant.now();

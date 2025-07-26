@@ -1,13 +1,5 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5422/orderdb?currentSchema=order_service
-    username: orderservice
-    password: orderservice
-  flyway:
-    enabled: true
   application:
     name: order-service
 
-order-service:
-  price-feed-url: http://localhost:8089/prices
 

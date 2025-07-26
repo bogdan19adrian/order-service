@@ -35,7 +35,7 @@ public class Execution {
     @SequenceGenerator(name = "exc_id_generator", sequenceName = "SEQ_EXC_ID", allocationSize = 1)
     @Column(name = "exc_id", nullable = false, length = 10, insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
-    private Long id;
+    private Long excId;
 
     @Column(name = "exc_internal_id", length = 36, nullable = false)
     private String internalId;

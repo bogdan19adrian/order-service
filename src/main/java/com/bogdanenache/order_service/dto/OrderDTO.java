@@ -19,7 +19,7 @@ public record OrderDTO(
     String side,
 
     @NotNull
-    @Min(value = 1)
+    @Min(value = 1, message = "Quantity must be at least 1")
     Integer quantity,
 
     String status,

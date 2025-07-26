@@ -5,6 +5,7 @@ import com.bogdanenache.order_service.service.OrderService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +23,7 @@ public class OrderRestController implements OrderAPI {
     @PostMapping("/orders")
     public ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid OrderDTO orderDTO) {
 
-        return ResponseEntity.ok(orderService.placeOrder(orderDTO));
+        return new ResponseEntity<>(orderService.placeOrder(orderDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/orders/{id}")
