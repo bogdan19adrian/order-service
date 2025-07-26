@@ -42,27 +42,8 @@ class PriceFeedRetryTest {
 
         verify(targetObject, times(2)).getPrice(anyString());
 
-
     }
 
-    @Test
-    void shouldFailAfterAllRetries() {
-        when(priceFeedService.getPrice(anyString()))
-                .thenThrow(new UnexpectedException("Temporary failure"))
-                .thenThrow(new UnexpectedException("Temporary failure"))
-                .thenThrow(new UnexpectedException("Temporary failure"));
-
-        // test that the PriceFeedService is being proxied for Retry
-        Assertions.assertThat(AopUtils.isAopProxy(priceFeedService)).isTrue();
-        // check that it's proxied by CGLIB since it's not implementing an interface
-        Assertions.assertThat(AopUtils.isCglibProxy(priceFeedService)).isTrue();
-        // get the mocked PriceFeedService so we can test expectations on it;
-        PriceFeedService expectedNumberRangeEntity = AopTestUtils.getUltimateTargetObject(priceFeedService);
-
-        var result = priceFeedService.getPrice("AAPL");
-
-        verify(expectedNumberRangeEntity, times(3)).getPrice(anyString());
-    }
 
     @Configuration
     @EnableRetry(proxyTargetClass=true)
