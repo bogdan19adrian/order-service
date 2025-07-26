@@ -24,42 +24,36 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
 
-    // 400 - Type mismatch (e.g. passing string instead of int)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String message = String.format("Invalid value '%s' for parameter '%s'", ex.getValue(), ex.getName());
-        return ResponseEntity.badRequest().body(new ErrorResponse("TYPE_MISMATCH", message));
+        return ResponseEntity.badRequest().body(new ErrorResponse(ErrorCode.TYPE_MISMATCH.name(), message));
     }
 
-    // 400 - Constraint violation (e.g. query param validation)
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
-        return ResponseEntity.badRequest().body(new ErrorResponse("CONSTRAINT_VIOLATION", ex.getMessage()));
+        return ResponseEntity.badRequest().body(new ErrorResponse(ErrorCode.CONSTRAINT_VIOLATION.name(), ex.getMessage()));
     }
 
-    // 404 - Resource not found
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(ErrorCode.NOT_FOUND.name(), ex.getMessage()));
     }
 
-    // 409 - Conflict (e.g. idempotency, duplicate key)
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(ErrorCode.CONFLICT.name(), ex.getMessage()));
     }
 
-    // 500 - Generic fallback
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
+                .body(new ErrorResponse(ErrorCode.INTERNAL_ERROR.name(), "An unexpected error occurred"));
     }
 
-    // 400 - Validation or malformed body
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
@@ -72,10 +66,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 ? String.format("Invalid value for field '%s': %s", fieldError.getField(), fieldError.getDefaultMessage())
                 : "Validation failed";
 
-        return ResponseEntity.badRequest().body(new ErrorResponse("VALIDATION_ERROR", message));
+        return ResponseEntity.badRequest().body(new ErrorResponse(ErrorCode.VALIDATION_ERROR.name(), message));
     }
 
-    // 400 - Missing query/path/body parameters
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException ex,
@@ -83,10 +76,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             org.springframework.web.context.request.WebRequest request
     ) {
-        return ResponseEntity.badRequest().body(new ErrorResponse("MISSING_PARAMETER", ex.getMessage()));
+        return ResponseEntity.badRequest().body(new ErrorResponse(ErrorCode.MISSING_PARAMETER.name(), ex.getMessage()));
     }
 
-    // 400 - Invalid body format (e.g. malformed JSON)
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex,
@@ -94,7 +86,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             org.springframework.web.context.request.WebRequest request
     ) {
-        return ResponseEntity.badRequest().body(new ErrorResponse("MALFORMED_JSON", "Request body is not readable"));
+        return ResponseEntity.badRequest().body(new ErrorResponse(ErrorCode.MALFORMED_JSON.name(), "Request body is not readable"));
     }
 }
-
