@@ -29,17 +29,17 @@ services:
     restart: unless-stopped
     networks:
       - orderservice
+
   order-service:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${SERVER_PORT}:8080"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       SERVER_PORT: ${SERVER_PORT}
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?currentSchema=${DATABASE_SCHEMA}
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5422/orderdb?currentSchema=order_service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?currentSchema=${DATABASE_SCHEMA}
       SPRING_DATASOURCE_USERNAME: ${DATABASE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
       SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: ${DATABASE_SCHEMA}
