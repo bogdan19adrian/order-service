@@ -56,4 +56,38 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
         Assertions.assertEquals("Invalid value for field 'quantity': Quantity must be at least 1", response.getBody().message());
     }
 
+
+    @Test
+    @DisplayName("Calls API to get an order by id successfully")
+    public void shouldGetOrderByIdSuccessfully() {
+        var orderDTO = createOrder(5, "AAPL");
+        var createResponse = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, OrderDTO.class);
+        String orderId = createResponse.getBody().id();
+
+        var getResponse = restTemplate.getForEntity("http://localhost:" + port + "/orders/" + orderId, OrderDTO.class);
+        Assertions.assertNotNull(getResponse.getBody());
+        Assertions.assertEquals(200, getResponse.getStatusCode().value());
+        Assertions.assertEquals(orderId, getResponse.getBody().id());
+    }
+
+    @Test
+    @DisplayName("Calls API to get an order by id and returns not found")
+    public void shouldReturnNotFoundForInvalidOrderId() {
+        var getResponse = restTemplate.getForEntity("http://localhost:" + port + "/orders/invalid-id", OrderDTO.class);
+        Assertions.assertEquals(404, getResponse.getStatusCode().value());
+    }
+
+    @Test
+    @DisplayName("Calls API to get orders by accountId successfully")
+    public void shouldGetOrdersByAccountIdSuccessfully() {
+        var orderDTO = createOrder(3, "AAPL");
+        restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, OrderDTO.class);
+
+        var getResponse = restTemplate.getForEntity("http://localhost:" + port + "/orders?accountId=" + orderDTO.accountId(), OrderDTO[].class);
+        Assertions.assertEquals(200, getResponse.getStatusCode().value());
+        Assertions.assertNotNull(getResponse.getBody());
+        Assertions.assertTrue(getResponse.getBody().length >= 1);
+        Assertions.assertEquals(orderDTO.accountId(), getResponse.getBody()[0].accountId());
+    }
+
 }

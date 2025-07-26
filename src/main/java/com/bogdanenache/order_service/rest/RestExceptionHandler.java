@@ -2,9 +2,7 @@ package com.bogdanenache.order_service.rest;
 
 import com.bogdanenache.order_service.dto.ErrorResponse;
 import com.bogdanenache.order_service.exception.BadRequestException;
-import com.bogdanenache.order_service.exception.ConflictException;
 import com.bogdanenache.order_service.exception.ErrorCode;
-import com.bogdanenache.order_service.exception.ResourceNotFoundException;
 import com.bogdanenache.order_service.exception.UnexpectedException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
@@ -36,18 +34,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
         return ResponseEntity.badRequest().body(new ErrorResponse(ErrorCode.CONSTRAINT_VIOLATION.name(), ex.getMessage()));
-    }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(ErrorCode.NOT_FOUND.name(), ex.getMessage()));
-    }
-
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(ErrorCode.CONFLICT.name(), ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
