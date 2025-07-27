@@ -25,7 +25,7 @@ public interface OrderAPI {
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
     })
     ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid OrderDTO orderDTO,
-            @RequestHeader(value = "X-Idempotency-Key", required = true) @Min(20) @Max(36) String idempotencyKey);
+            @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey);
 
 
     @Operation(summary = "Get an order by ID", description = "Returns a single order if it exists.")

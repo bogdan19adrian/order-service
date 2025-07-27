@@ -33,7 +33,7 @@ public class OrderRestController implements OrderAPI {
     @PostMapping(value = "/orders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderDTO> createOrder(
             @RequestBody @Valid OrderDTO orderDTO,
-            @RequestHeader(value = "X-Idempotency-Key", required = true) @Min(20) @Max(36) String idempotencyKey) {
+            @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey) {
         log.info("Received request to create a new order: {}", orderDTO);
 
         // Validate idempotency key before placing the order
