@@ -45,7 +45,7 @@ public class OrderService {
         try {
             price = priceFeed.getPrice(orderDTO.symbol());
         } catch (ExhaustedRetryException e) {
-            if (e.getRootCause().getMessage().contains("400 Bad Request")) {
+            if (e.getRootCause().getMessage().contains("400 Bad Request") || e.getRootCause().getMessage().contains("404 Not Found")) {
                 throw new BadRequestException(Message.PRICE_NOT_FOUND_FOR_SYMBOL.with(orderDTO.symbol()), ErrorCode.BAD_REQUEST, e);
             } else {
                 throw e;

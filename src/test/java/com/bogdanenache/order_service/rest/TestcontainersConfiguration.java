@@ -20,15 +20,17 @@ class TestcontainersConfiguration {
 
     @Bean
     WireMockContainer wiremockServer() {
-        return new WireMockContainer("wiremock/wiremock:3.6.0");
-//                .withCopyToContainer(Transferable.of("/resource/wiremock"), "/home/wiremock/mappings");
-//                .withCopyToContainer(Transferable.of("/resource/wiremock/2.json"), "/home/wiremock/mappings")
-//                .withCopyToContainer(Transferable.of("/resource/wiremock/3.json"), "/home/wiremock/mappings")
-//                .withCopyToContainer(Transferable.of("/resource/wiremock/4.json"), "/home/wiremock/mappings")
-//                .withCopyToContainer(Transferable.of("/resource/wiremock/5.json"), "/home/wiremock/mappings")
-//                .withCopyToContainer(Transferable.of("/resource/wiremock/badrequest.json"), "/home/wiremock/mappings")
-//                .withCopyToContainer(Transferable.of("/resource/wiremock/error.json"), "/home/wiremock/mappings")
-//                .withCopyToContainer(Transferable.of("/resource/wiremock/notfound.json"), "/home/wiremock/mappings");
+         return new WireMockContainer("wiremock/wiremock:3.6.0")
+                .withMappingFromResource("wiremock/a1.json")
+                .withMappingFromResource("wiremock/a2.json")
+                .withMappingFromResource("wiremock/a3.json")
+                .withMappingFromResource("wiremock/a4.json")
+                .withMappingFromResource("wiremock/a5.json")
+                .withMappingFromResource("wiremock/error.json")
+                .withMappingFromResource("wiremock/badrequest.json")
+                .withMappingFromResource("wiremock/notfound.json")
+                .withMappingFromResource("wiremock/smallprice.json")
+                .withMappingFromResource("wiremock/bigprice.json");
     }
 
     @Bean

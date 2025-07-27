@@ -70,11 +70,10 @@ public class PriceFeedService {
     }
 
     @Recover
-    public Optional<BigDecimal> recover(UnexpectedException ex, String symbol) {
+    public Optional<BigDecimal> recover(UnexpectedException unexpectedException, String symbol) {
         log.info("Retry Number: {} ", RetrySynchronizationManager.getContext().getRetryCount());
         log.info("Retry connection to price feed recovered at : {}", LocalDateTime.now());
-        log.error(ex.getMessage(), ex);
-        return Optional.empty();
+        throw unexpectedException;
     }
 
 }
