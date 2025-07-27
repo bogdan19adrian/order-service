@@ -32,6 +32,7 @@ services:
       - orderservice
 
   order-service:
+    container_name: order-service
     build:
       context: .
       dockerfile: Dockerfile
@@ -53,6 +54,11 @@ services:
       - wiremock
     networks:
       - orderservice
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/actuator/health | grep '\"status\":\"UP\"'"]
+      interval: 50s
+      timeout: 30s
+      retries: 5
 
 networks:
   orderservice:

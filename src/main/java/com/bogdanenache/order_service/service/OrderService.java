@@ -1,6 +1,5 @@
 package com.bogdanenache.order_service.service;
 
-
 import com.bogdanenache.order_service.dao.entity.Execution;
 import com.bogdanenache.order_service.dao.entity.Order;
 import com.bogdanenache.order_service.dao.entity.Order.OrderStatus;
@@ -20,14 +19,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.retry.ExhaustedRetryException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class responsible for handling order-related operations.
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final PriceFeedService priceFeed;
-
     private final OrderRepository orderRepo;
 
+    /**
+     * Populates an Execution entity with the given order and price.
+     *
+     * @param order the order associated with the execution
+     * @param price the price at which the order is executed
+     * @return a populated Execution entity
+     */
     private static Execution populateExecution(Order order, BigDecimal price) {
         return Execution.builder()
                 .order(order)
@@ -38,7 +46,14 @@ public class OrderService {
     }
 
     /**
-     * try-catch block is used to handle specific bad request error thrown that should not enter in retrigger logic.
+     * Places an order based on the provided OrderDTO.
+     * Handles price retrieval and order processing logic.
+     * If the price is unavailable, the order is marked as FAILED.
+     *
+     * @param orderDTO the data transfer object containing order details
+     * @return the processed OrderDTO with execution details if applicable
+     * @throws BadRequestException if the price for the symbol is not found
+     * @throws ExhaustedRetryException if other unexpected errors occur during price retrieval
      */
     public OrderDTO placeOrder(OrderDTO orderDTO) {
         final Optional<BigDecimal> price;
@@ -53,18 +68,22 @@ public class OrderService {
         }
         final Order order = populateOrder(orderDTO, price);
         if (price.isEmpty()) {
-            // if price is not available, we cannot process the order
             order.setStatus(OrderStatus.FAILED);
             return OrderMapper.INSTANCE.orderToOrderDto(orderRepo.save(order), null);
         }
         final Execution execution = populateExecution(order, price.get());
-        order.setExecution(execution); // link both ways
+        order.setExecution(execution);
         var executionDto = ExecutionMapper.INSTANCE.mapExecutionToExecutionDto(execution, order.getOrderInternalId());
 
         return OrderMapper.INSTANCE.orderToOrderDto(orderRepo.save(order), executionDto);
-
     }
 
+    /**
+     * Retrieves an order by its internal ID.
+     *
+     * @param internalId the internal ID of the order
+     * @return an Optional containing the OrderDTO if found, or empty if not found
+     */
     public Optional<OrderDTO> getOrderByInternalId(String internalId) {
         var order = orderRepo.getOrderByOrderInternalId(internalId);
         if (order == null) {
@@ -74,6 +93,12 @@ public class OrderService {
         return Optional.of(OrderMapper.INSTANCE.orderToOrderDto(order, executionDto));
     }
 
+    /**
+     * Retrieves all orders associated with a specific account ID.
+     *
+     * @param accountId the account ID for which orders are retrieved
+     * @return a list of OrderDTOs representing the orders for the account
+     */
     public List<OrderDTO> getOrderByAccountId(String accountId) {
         return orderRepo.getOrderByAccountId(accountId)
                 .stream()
@@ -83,6 +108,14 @@ public class OrderService {
                 .toList();
     }
 
+    /**
+     * Populates an Order entity based on the provided OrderDTO and price.
+     * Sets the order status based on the availability of the price.
+     *
+     * @param orderDTO the data transfer object containing order details
+     * @param price the price associated with the order, if available
+     * @return a populated Order entity
+     */
     private Order populateOrder(OrderDTO orderDTO, Optional<BigDecimal> price) {
         final Order order = OrderMapper.INSTANCE.orderDtoToOrder(orderDTO);
         order.setStatus(price.isEmpty() ? OrderStatus.FAILED : OrderStatus.PROCESSED);
