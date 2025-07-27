@@ -12,9 +12,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 order-service:
-  price-feed-url: http://localhost:8089/prices
+  price-feed-url: http://localhost:8089/price
   retry:
-    maxAttempts: 5
+    maxAttempts: 1
     backoff:
       delay: 25
       maxDelay: 250

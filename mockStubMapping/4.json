@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/price",
+    "queryParameters": {
+      "symbol": {
+        "equalTo": "ORCL"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "symbol": "ORCL",
+      "price": 1.000004
+    }
+  }
+}

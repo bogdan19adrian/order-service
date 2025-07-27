@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/price",
+    "queryParameters": {
+      "symbol": {
+        "equalTo": "MSFT"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "symbol": "MSFT",
+      "price": 2203.554388
+    }
+  }
+}

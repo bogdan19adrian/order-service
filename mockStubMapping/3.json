@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/price",
+    "queryParameters": {
+      "symbol": {
+        "equalTo": "AAPL"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "symbol": "AAPL",
+      "price": 203.752321
+    }
+  }
+}

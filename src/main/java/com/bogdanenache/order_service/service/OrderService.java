@@ -6,7 +6,9 @@ import com.bogdanenache.order_service.dao.entity.Order;
 import com.bogdanenache.order_service.dao.entity.Order.OrderStatus;
 import com.bogdanenache.order_service.dao.repository.OrderRepository;
 import com.bogdanenache.order_service.dto.OrderDTO;
-import com.bogdanenache.order_service.exception.UnexpectedException;
+import com.bogdanenache.order_service.exception.BadRequestException;
+import com.bogdanenache.order_service.exception.BadRequestException.Message;
+import com.bogdanenache.order_service.exception.ErrorCode;
 import com.bogdanenache.order_service.mapper.ExecutionMapper;
 import com.bogdanenache.order_service.mapper.OrderMapper;
 import java.math.BigDecimal;
@@ -17,8 +19,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.retry.ExhaustedRetryException;
 import org.springframework.stereotype.Service;
-
-import static com.bogdanenache.order_service.exception.UnexpectedException.Message.UNABLE_TO_CALL_PRICE_FEED;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +37,19 @@ public class OrderService {
                 .build();
     }
 
+    /**
+     * try-catch block is used to handle specific bad request error thrown that should not enter in retrigger logic.
+     */
     public OrderDTO placeOrder(OrderDTO orderDTO) {
-
         final Optional<BigDecimal> price;
         try {
             price = priceFeed.getPrice(orderDTO.symbol());
-        } catch (UnexpectedException | ExhaustedRetryException e) {
-            throw new UnexpectedException(UNABLE_TO_CALL_PRICE_FEED.getFormatMessage());
+        } catch (ExhaustedRetryException e) {
+            if (e.getRootCause().getMessage().contains("400 Bad Request")) {
+                throw new BadRequestException(Message.PRICE_NOT_FOUND_FOR_SYMBOL.with(orderDTO.symbol()), ErrorCode.BAD_REQUEST, e);
+            } else {
+                throw e;
+            }
         }
         final Order order = populateOrder(orderDTO, price);
         if (price.isEmpty()) {

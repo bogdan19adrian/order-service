@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/price",
+    "queryParameters": {
+      "symbol": {
+        "equalTo": "error"
+      }
+    }
+  },
+  "response": {
+    "status": 500,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "error": "error",
+      "code": "internal server error",
+      "message": "An error occurred while processing your request."
+    }
+  }
+}

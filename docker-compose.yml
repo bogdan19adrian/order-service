@@ -27,6 +27,7 @@ services:
     volumes:
       - ./mockStubMapping:/home/wiremock/mappings
     restart: unless-stopped
+    command: ["--global-response-templating"]
     networks:
       - orderservice
 

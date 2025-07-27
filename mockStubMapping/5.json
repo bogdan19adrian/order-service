@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/price",
+    "queryParameters": {
+      "symbol": {
+        "equalTo": "SAP"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "symbol": "SAP",
+      "price": 13.551234
+    }
+  }
+}

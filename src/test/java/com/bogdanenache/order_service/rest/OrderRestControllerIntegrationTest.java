@@ -89,5 +89,23 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
         Assertions.assertTrue(getResponse.getBody().length >= 1);
         Assertions.assertEquals(orderDTO.accountId(), getResponse.getBody()[0].accountId());
     }
+    @Test
+    @DisplayName("Returns SERVICE_UNAVAILABLE when dependent service fails")
+    public void shouldReturnServiceUnavailableWhenPriceFeedFails() {
+        // Simulate a symbol that triggers UnexpectedException in your service
+        var orderDTO = createOrder(1, "error");
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, ErrorResponse.class);
+        Assertions.assertEquals(503, response.getStatusCode().value());
+        Assertions.assertEquals("Service is currently unavailable", response.getBody().message());
+    }
 
+    @Test
+    @DisplayName("Returns UNPROCESSABLE_ENTITY for business validation error")
+    public void shouldReturnUnprocessableEntityForBusinessError() {
+        // Simulate a request that triggers BadRequestException (e.g., invalid symbol)
+        var orderDTO = createOrder(1, "badrequest");
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, ErrorResponse.class);
+        Assertions.assertEquals(422, response.getStatusCode().value());
+        Assertions.assertEquals("An unexpected error occurred while processing the request", response.getBody().message());
+    }
 }
