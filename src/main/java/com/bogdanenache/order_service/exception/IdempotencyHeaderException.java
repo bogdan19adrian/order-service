@@ -4,7 +4,7 @@ package com.bogdanenache.order_service.exception;
  * Custom exception to represent a bad request scenario.
  * This exception is typically thrown when the client sends an invalid request.
  */
-public class BadRequestException extends RuntimeException {
+public class IdempotencyHeaderException extends RuntimeException {
 
     private final ErrorCode errorCode;
 
@@ -13,7 +13,7 @@ public class BadRequestException extends RuntimeException {
      *
      * @param message the detail message explaining the reason for the exception
      */
-    public BadRequestException(String message) {
+    public IdempotencyHeaderException(String message) {
         super(message);
         this.errorCode = ErrorCode.BAD_REQUEST;
     }
@@ -24,7 +24,7 @@ public class BadRequestException extends RuntimeException {
      * @param message   the detail message explaining the reason for the exception
      * @param errorCode the specific error code associated with this exception
      */
-    public BadRequestException(String message, ErrorCode errorCode) {
+    public IdempotencyHeaderException(String message, ErrorCode errorCode) {
         super(message);
         this.errorCode = errorCode;
     }
@@ -35,7 +35,7 @@ public class BadRequestException extends RuntimeException {
      * @param message   the predefined message enum containing the format string
      * @param errorCode the specific error code associated with this exception
      */
-    public BadRequestException(Message message, ErrorCode errorCode) {
+    public IdempotencyHeaderException(Message message, ErrorCode errorCode) {
         this(message.getFormatMessage(), errorCode);
     }
 
@@ -46,7 +46,7 @@ public class BadRequestException extends RuntimeException {
      * @param errorCode the specific error code associated with this exception
      * @param e         the cause of the exception
      */
-    public BadRequestException(String message, ErrorCode errorCode, Throwable e) {
+    public IdempotencyHeaderException(String message, ErrorCode errorCode, Throwable e) {
         super(message, e);
         this.errorCode = errorCode;
     }
@@ -65,7 +65,8 @@ public class BadRequestException extends RuntimeException {
      * Each message can be formatted with additional parameters.
      */
     public enum Message {
-        PRICE_NOT_FOUND_FOR_SYMBOL("Price not found for symbol: %s.");
+        USED_IDEMPOTENCY_KEY("Idempotency key %s is already used."),
+        INVALID_IDEMPOTENCY_KEY("Idempotency key %s is invalid.");
 
         final String msg;
 

@@ -14,9 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.UUID;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -27,6 +32,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Testcontainers
 public class OrderRestControllerIntegrationTest extends BaseTest {
 
+    private static final String IDEMPOTENCY_HEADER_NAME = "X-Idempotency-Key";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -39,7 +45,12 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     @DisplayName("Calls API to create an order successfully")
     public void shouldCreateOrderSuccessfully() {
         var orderDTO = createOrder(10, "AAPL");
-        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, OrderDTO.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(IDEMPOTENCY_HEADER_NAME, UUID.randomUUID().toString());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, OrderDTO.class);
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(201, response.getStatusCode().value());
         Assertions.assertEquals(10, response.getBody().quantity());
@@ -50,7 +61,12 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     @DisplayName("Calls API  to create an order with -1 quantity and fails")
     public void shouldFailCreateOrderIfQuantityIsNegative() {
         var orderDTO = createOrder(-1, "AAPL");
-        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, ErrorResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(IDEMPOTENCY_HEADER_NAME, UUID.randomUUID().toString());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, ErrorResponse.class);
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(400, response.getStatusCode().value());
         Assertions.assertEquals("Invalid value for field 'quantity': Quantity must be at least 1", response.getBody().message());
@@ -61,7 +77,12 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     @DisplayName("Calls API to get an order by id successfully")
     public void shouldGetOrderByIdSuccessfully() {
         var orderDTO = createOrder(5, "AAPL");
-        var createResponse = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, OrderDTO.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(IDEMPOTENCY_HEADER_NAME, UUID.randomUUID().toString());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+
+        var createResponse = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, OrderDTO.class);
         String orderId = createResponse.getBody().id();
 
         var getResponse = restTemplate.getForEntity("http://localhost:" + port + "/orders/" + orderId, OrderDTO.class);
@@ -82,7 +103,12 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     @DisplayName("Calls API to get orders by accountId successfully")
     public void shouldGetOrdersByAccountIdSuccessfully() {
         var orderDTO = createOrder(3, "AAPL");
-        restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, OrderDTO.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(IDEMPOTENCY_HEADER_NAME, UUID.randomUUID().toString());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+
+        restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, OrderDTO.class);
 
         var getResponse = restTemplate.getForEntity("http://localhost:" + port + "/orders?accountId=" + orderDTO.accountId(), OrderDTO[].class);
         Assertions.assertEquals(200, getResponse.getStatusCode().value());
@@ -96,7 +122,12 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     public void shouldReturnServiceUnavailableWhenPriceFeedFails() {
         // Simulate a symbol that triggers UnexpectedException in your service
         var orderDTO = createOrder(1, "error");
-        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, ErrorResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(IDEMPOTENCY_HEADER_NAME, UUID.randomUUID().toString());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, ErrorResponse.class);
         Assertions.assertEquals(503, response.getStatusCode().value());
         Assertions.assertEquals("Service is currently unavailable", response.getBody().message());
     }
@@ -106,8 +137,64 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
     public void shouldReturnUnprocessableEntityForBusinessError() {
         // Simulate a request that triggers BadRequestException (e.g., invalid symbol)
         var orderDTO = createOrder(1, "badrequest");
-        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, ErrorResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(IDEMPOTENCY_HEADER_NAME, UUID.randomUUID().toString());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, ErrorResponse.class);
         Assertions.assertEquals(422, response.getStatusCode().value());
         Assertions.assertEquals("An unexpected error occurred while processing the request", response.getBody().message());
     }
+
+    @Test
+    @DisplayName("Calls API and fails if idempotency header is missing")
+    public void shouldFailToCreateOrderIfIdempotencyHeaderIsMissing() {
+        var orderDTO = createOrder(10, "AAPL");
+
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", orderDTO, ErrorResponse.class);
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(400, response.getStatusCode().value());
+        Assertions.assertEquals("Idempotency key null is invalid.", response.getBody().message());
+
+    }
+    @Test
+    @DisplayName("Calls API and fails if idempotency header is larger than 36")
+    public void shouldFailToCreateOrderIfIdempotencyHeaderIsLargerThan36() {
+        var orderDTO = createOrder(10, "AAPL");
+        HttpHeaders headers = new HttpHeaders();
+        var headerValue = UUID.randomUUID().toString() + "aaaaa";
+        headers.set(IDEMPOTENCY_HEADER_NAME, headerValue);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+        var response = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, ErrorResponse.class);
+
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(400, response.getStatusCode().value());
+        Assertions.assertEquals("Idempotency key " + headerValue +" is invalid.", response.getBody().message());
+
+    }
+
+    @Test
+    @DisplayName("Calls API and fails if idempotency header is reused")
+    public void shouldFailToCreateOrderIfIdempotencyHeaderIsReused() {
+        var orderDTO = createOrder(10, "AAPL");
+        HttpHeaders headers = new HttpHeaders();
+        String idempotencyKeyHeader = UUID.randomUUID().toString();
+        headers.set(IDEMPOTENCY_HEADER_NAME, idempotencyKeyHeader);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderDTO> httpEntity = new HttpEntity<>(orderDTO, headers);
+
+        var responseSuccessfully = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, OrderDTO.class);
+        var responseUnuccessfully = restTemplate.postForEntity("http://localhost:" + port + "/orders", httpEntity, ErrorResponse.class);
+
+        Assertions.assertNotNull(responseSuccessfully.getBody());
+        Assertions.assertEquals(201, responseSuccessfully.getStatusCode().value());
+
+        Assertions.assertNotNull(responseUnuccessfully.getBody());
+        Assertions.assertEquals(400, responseUnuccessfully.getStatusCode().value());
+        Assertions.assertEquals("Idempotency key " + idempotencyKeyHeader +" is already used.", responseUnuccessfully.getBody().message());
+
+    }
+
 }
