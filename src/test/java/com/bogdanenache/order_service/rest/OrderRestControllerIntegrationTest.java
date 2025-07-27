@@ -68,6 +68,7 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
         Assertions.assertNotNull(getResponse.getBody());
         Assertions.assertEquals(200, getResponse.getStatusCode().value());
         Assertions.assertEquals(orderId, getResponse.getBody().id());
+        Assertions.assertNotNull(getResponse.getBody().execution());
     }
 
     @Test
@@ -88,6 +89,7 @@ public class OrderRestControllerIntegrationTest extends BaseTest {
         Assertions.assertNotNull(getResponse.getBody());
         Assertions.assertTrue(getResponse.getBody().length >= 1);
         Assertions.assertEquals(orderDTO.accountId(), getResponse.getBody()[0].accountId());
+        Assertions.assertNotNull(getResponse.getBody()[0].execution());
     }
     @Test
     @DisplayName("Returns SERVICE_UNAVAILABLE when dependent service fails")

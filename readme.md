@@ -36,7 +36,7 @@ curl --location 'http://localhost:8084/orders' \
 "symbol": "TSLA",
 "side": "BUY",
 "quantity": 1
-
+}'
 curl --location 'http://localhost:8084/orders?accountId=1'
 
 curl --location 'http://localhost:8084/orders/dba7eb37-1d9c-41b8-912b-20259d087815'
