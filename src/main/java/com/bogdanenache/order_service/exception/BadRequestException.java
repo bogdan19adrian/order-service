@@ -65,7 +65,8 @@ public class BadRequestException extends RuntimeException {
      * Each message can be formatted with additional parameters.
      */
     public enum Message {
-        PRICE_NOT_FOUND_FOR_SYMBOL("Price not found for symbol: %s.");
+        PRICE_NOT_FOUND_FOR_SYMBOL("Price not found for symbol: %s."),
+        USED_IDEMPOTENCY_KEY("Idempotency key  %s already used.");
 
         final String msg;
 

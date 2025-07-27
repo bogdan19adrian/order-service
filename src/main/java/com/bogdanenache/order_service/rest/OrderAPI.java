@@ -8,19 +8,24 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 public interface OrderAPI {
 
-    @Operation(summary = "Create a new order", description = "Places a BUY or SELL order and executes it at the current price.")
+
+    @Operation(summary = "Create a new  order",
+            description = "Places a BUY or SELL order and executes it at the current price.. Use 'X-Idempotency-Key' header to ensure safe retries.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Order successfully created",
                     content = @Content(schema = @Schema(implementation = OrderDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
     })
-    ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid OrderDTO orderDTO);
+    ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid OrderDTO orderDTO,
+            @RequestHeader(value = "X-Idempotency-Key", required = true) @Min(20) @Max(36) String idempotencyKey);
 
 
     @Operation(summary = "Get an order by ID", description = "Returns a single order if it exists.")

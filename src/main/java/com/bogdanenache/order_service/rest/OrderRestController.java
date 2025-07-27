@@ -1,9 +1,12 @@
 package com.bogdanenache.order_service.rest;
 
 import com.bogdanenache.order_service.dto.OrderDTO;
+import com.bogdanenache.order_service.service.IdempotencyService;
 import com.bogdanenache.order_service.service.OrderService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,12 +27,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderRestController implements OrderAPI {
 
     private final OrderService orderService;
+    private final IdempotencyService idempotencyService;
 
     @RateLimiter(name ="orderServiceRateLimiter")
     @PostMapping(value = "/orders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid OrderDTO orderDTO) {
+    public ResponseEntity<OrderDTO> createOrder(
+            @RequestBody @Valid OrderDTO orderDTO,
+            @RequestHeader(value = "X-Idempotency-Key", required = true) @Min(20) @Max(36) String idempotencyKey) {
         log.info("Received request to create a new order: {}", orderDTO);
-        return new ResponseEntity<>(orderService.placeOrder(orderDTO), HttpStatus.CREATED);
+
+        // Validate idempotency key before placing the order
+        idempotencyService.validateIdempotencyKey(idempotencyKey);
+
+        return new ResponseEntity<>(orderService.placeOrder(orderDTO, idempotencyKey), HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/orders/{id}", produces =  MediaType.APPLICATION_JSON_VALUE)
