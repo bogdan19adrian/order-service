@@ -40,3 +40,5 @@ curl --location 'http://localhost:8084/orders' \
 curl --location 'http://localhost:8084/orders?accountId=1'
 
 curl --location 'http://localhost:8084/orders/dba7eb37-1d9c-41b8-912b-20259d087815'
+
+The following commands are just examples and values in jsons must be adjusted based on the actual input/output.
