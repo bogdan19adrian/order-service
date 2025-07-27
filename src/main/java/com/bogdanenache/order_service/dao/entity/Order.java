@@ -68,6 +68,9 @@ public class Order {
     @Column(name = "ord_created")
     private Instant createdAt;
 
+    @Column(name = "ORD_IDEMPOTENCY_KEY", unique = true)
+    private String idempotencyKey;
+
 
     public enum OrderStatus {
         PROCESSED,

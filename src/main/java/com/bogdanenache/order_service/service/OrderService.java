@@ -51,11 +51,12 @@ public class OrderService {
      * If the price is unavailable, the order is marked as FAILED.
      *
      * @param orderDTO the data transfer object containing order details
+     * @param idempotencyKey to be saved along the order to ensure idempotency
      * @return the processed OrderDTO with execution details if applicable
      * @throws BadRequestException if the price for the symbol is not found
      * @throws ExhaustedRetryException if other unexpected errors occur during price retrieval
      */
-    public OrderDTO placeOrder(OrderDTO orderDTO) {
+    public OrderDTO placeOrder(OrderDTO orderDTO, String idempotencyKey) {
         final Optional<BigDecimal> price;
         try {
             price = priceFeed.getPrice(orderDTO.symbol());
@@ -66,7 +67,7 @@ public class OrderService {
                 throw e;
             }
         }
-        final Order order = populateOrder(orderDTO, price);
+        final Order order = populateOrder(orderDTO, price, idempotencyKey);
         if (price.isEmpty()) {
             order.setStatus(OrderStatus.FAILED);
             return OrderMapper.INSTANCE.orderToOrderDto(orderRepo.save(order), null);
@@ -116,8 +117,8 @@ public class OrderService {
      * @param price the price associated with the order, if available
      * @return a populated Order entity
      */
-    private Order populateOrder(OrderDTO orderDTO, Optional<BigDecimal> price) {
-        final Order order = OrderMapper.INSTANCE.orderDtoToOrder(orderDTO);
+    private Order populateOrder(OrderDTO orderDTO, Optional<BigDecimal> price, String idempotencyKey) {
+        final Order order = OrderMapper.INSTANCE.orderDtoToOrder(orderDTO, idempotencyKey);
         order.setStatus(price.isEmpty() ? OrderStatus.FAILED : OrderStatus.PROCESSED);
         return order;
     }
