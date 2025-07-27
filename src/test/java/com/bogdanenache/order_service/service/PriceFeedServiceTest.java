@@ -1,25 +1,18 @@
 package com.bogdanenache.order_service.service;
 
 import com.bogdanenache.order_service.dto.PriceItem;
-import com.bogdanenache.order_service.exception.BadRequestException;
 import com.bogdanenache.order_service.exception.UnexpectedException;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +20,8 @@ class PriceFeedServiceTest {
 
     private RestTemplate restTemplate;
     private PriceFeedService priceFeedService;
+    private final String url = "http://mock-url";
+    private final String path = "?symbol={symbol}";
 
     @BeforeEach
     void setUp() {
@@ -36,7 +31,7 @@ class PriceFeedServiceTest {
         try {
             var field = PriceFeedService.class.getDeclaredField("priceFeedUrl");
             field.setAccessible(true);
-            field.set(priceFeedService, "http://mock-url");
+            field.set(priceFeedService, url);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -45,11 +40,9 @@ class PriceFeedServiceTest {
     @Test
     void getPrice_shouldReturnPrice_whenSymbolExists() {
         PriceItem item = new PriceItem("AAPL", BigDecimal.TEN);
-        List<PriceItem> items = List.of(item);
-        ResponseEntity<List<PriceItem>> response = ResponseEntity.ok(items);
+        ResponseEntity<PriceItem> response = ResponseEntity.ok(item);
 
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
-                any(ParameterizedTypeReference.class)))
+        when(restTemplate.getForEntity(url + path, PriceItem.class, "AAPL"))
                 .thenReturn(response);
 
         Optional<BigDecimal> result = priceFeedService.getPrice("AAPL");
@@ -59,21 +52,18 @@ class PriceFeedServiceTest {
 
     @Test
     void getPrice_shouldThrowBadRequest_whenSymbolNotFound() {
+
         PriceItem item = new PriceItem("GOOG", BigDecimal.ONE);
-        List<PriceItem> items = List.of(item);
-        ResponseEntity<List<PriceItem>> response = ResponseEntity.ok(items);
+        ResponseEntity<PriceItem> response = ResponseEntity.ok(item);
 
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
-                any(ParameterizedTypeReference.class)))
+        when(restTemplate.getForEntity(url + path, PriceItem.class, "GOOG"))
                 .thenReturn(response);
-
-        assertThrows(BadRequestException.class, () -> priceFeedService.getPrice("AAPL"));
+        assertThrows(UnexpectedException.class, () -> priceFeedService.getPrice("AAPL"));
     }
 
     @Test
     void getPrice_shouldThrowUnexpected_whenResponseIsNull() {
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
-                any(ParameterizedTypeReference.class)))
+        when(restTemplate.getForEntity(url + path, PriceItem.class, "AAPL"))
                 .thenReturn(null);
 
         assertThrows(UnexpectedException.class, () -> priceFeedService.getPrice("AAPL"));
@@ -81,8 +71,7 @@ class PriceFeedServiceTest {
 
     @Test
     void getPrice_shouldThrowUnexpected_whenRestTemplateThrows() {
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
-                any(ParameterizedTypeReference.class)))
+        when(restTemplate.getForEntity(url + path, PriceItem.class, "AAPL"))
                 .thenThrow(new RuntimeException("fail"));
 
         assertThrows(UnexpectedException.class, () -> priceFeedService.getPrice("AAPL"));

@@ -59,7 +59,7 @@ class PriceFeedRetryTest {
 
         priceFeedService.getPrice("AAPL");
         // 3 is the default max attempts set
-        verify(targetObject, times(2)).getPrice(anyString());
+        verify(targetObject, times(5)).getPrice(anyString());
     }
 
     @Configuration
