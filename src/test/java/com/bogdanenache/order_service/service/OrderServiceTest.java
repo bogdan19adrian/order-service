@@ -9,6 +9,8 @@ import com.bogdanenache.order_service.exception.UnexpectedException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -36,13 +38,14 @@ public class OrderServiceTest extends BaseTest {
 
     @Test
     void placeOrder_shouldProcessOrder_whenPriceAvailable() {
+        String idempotencyKey = UUID.randomUUID().toString();
         OrderDTO orderDTO = createOrder(10, "AAPL");
         when(priceFeed.getPrice("symbol")).thenReturn(Optional.of(BigDecimal.ONE));
         Order order = new Order();
         order.setStatus(OrderStatus.PROCESSED);
         when(orderRepo.save(any())).thenReturn(order);
 
-        OrderDTO result = orderService.placeOrder(orderDTO);
+        OrderDTO result = orderService.placeOrder(orderDTO, idempotencyKey);
 
         assertNotNull(result);
         assertEquals(OrderStatus.PROCESSED.name(), result.status());
@@ -50,13 +53,14 @@ public class OrderServiceTest extends BaseTest {
 
     @Test
     void placeOrder_shouldFailOrder_whenPriceNotAvailable() {
+        String idempotencyKey = UUID.randomUUID().toString();
         OrderDTO orderDTO = createOrder(10, "AAPL");
         when(priceFeed.getPrice("symbol")).thenReturn(Optional.empty());
         Order order = new Order();
         order.setStatus(OrderStatus.FAILED);
         when(orderRepo.save(any())).thenReturn(order);
 
-        OrderDTO result = orderService.placeOrder(orderDTO);
+        OrderDTO result = orderService.placeOrder(orderDTO, idempotencyKey);
 
         assertNotNull(result);
         assertEquals(OrderStatus.FAILED.name(), result.status());
@@ -64,10 +68,12 @@ public class OrderServiceTest extends BaseTest {
 
     @Test
     void placeOrder_shouldThrow_whenPriceFeedThrows() {
+        String idempotencyKey = UUID.randomUUID().toString();
+
         OrderDTO orderDTO = createOrder(10, "AAPL");
         when(priceFeed.getPrice("AAPL")).thenThrow(new UnexpectedException("fail"));
 
-        assertThrows(UnexpectedException.class, () -> orderService.placeOrder(orderDTO));
+        assertThrows(UnexpectedException.class, () -> orderService.placeOrder(orderDTO, idempotencyKey));
     }
 
     @Test

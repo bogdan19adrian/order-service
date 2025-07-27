@@ -22,7 +22,9 @@ public interface OrderMapper {
 
     @Mapping(target = "createdAt", source = "orderDTO", qualifiedByName = "createdAt")
     @Mapping(target = "orderInternalId", source = "orderDTO", qualifiedByName = "mapToOrderInternalId")
-    Order orderDtoToOrder(OrderDTO orderDTO);
+    @Mapping(target = "idempotencyKey", source = "idempotencyKey")
+    Order orderDtoToOrder(OrderDTO orderDTO, String idempotencyKey);
+
 
     @Named("mapToOrderInternalId")
     static String mapToOrderInternalId(OrderDTO orderDTO) {

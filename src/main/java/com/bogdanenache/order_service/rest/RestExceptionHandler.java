@@ -3,6 +3,7 @@ package com.bogdanenache.order_service.rest;
 import com.bogdanenache.order_service.dto.ErrorResponse;
 import com.bogdanenache.order_service.exception.BadRequestException;
 import com.bogdanenache.order_service.exception.ErrorCode;
+import com.bogdanenache.order_service.exception.IdempotencyHeaderException;
 import com.bogdanenache.order_service.exception.UnexpectedException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
@@ -71,10 +72,23 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      * @return a ResponseEntity containing an error response with a service unavailable status
      */
     @ExceptionHandler(UnexpectedException.class)
-    public ResponseEntity<ErrorResponse> UnexpectedException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception ex) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(new ErrorResponse(ErrorCode.SERVICE_UNAVAILABLE.name(), "Service is currently unavailable"));
+    }
+
+    /**
+     * Handles IdempotencyHeaderException and maps it to a service unavailable response.
+     *
+     * @param ex the IdempotencyHeaderException thrown
+     * @return a ResponseEntity containing an error response with a bad request status
+     */
+    @ExceptionHandler(IdempotencyHeaderException.class)
+    public ResponseEntity<ErrorResponse> handleIdempotencyHeaderException(Exception ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorCode.BAD_REQUEST.name(), ex.getMessage()));
     }
 
     /**
